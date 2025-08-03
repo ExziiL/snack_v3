@@ -1,5 +1,6 @@
 "use client";
 
+import { createClient } from "@/supabase/client";
 import { Field } from "@base-ui-components/react/field";
 import { Form } from "@base-ui-components/react/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,11 +22,16 @@ const schema = z.object({
 		.string()
 		.min(1, { message: "Category is required" })
 		.min(2, "Must be at least 2 characters"),
+	quantity: z.coerce
+		.number()
+		.min(1, { message: "Quantity is required" })
+		.positive("Must be a positive number"),
 });
 
 type FormValues = z.infer<typeof schema>;
 
 export default function NewEntryForm() {
+	const supabase = createClient();
 	const {
 		register,
 		handleSubmit,
@@ -34,14 +40,60 @@ export default function NewEntryForm() {
 	} = useForm({
 		resolver: zodResolver(schema),
 		defaultValues: {
-			article_name: "",
-			price: undefined,
-			category: "",
+			article_name: "Cola Zero",
+			quantity: 1,
+			price: 123,
+			category: "Cola Zero",
 		},
 	});
 
 	const onSubmit = async (data: FormValues) => {
-		console.log("validated data: ", data);
+		try {
+			const {
+				data: { user },
+			} = await supabase.auth.getUser();
+			const userId = user?.id;
+
+			const { data: catData, error: catError } = await supabase
+				.from("categories")
+				.upsert(
+					{ name: data.article_name.trim(), user_id: userId },
+					{ onConflict: "name" }
+				)
+				.select("id");
+
+			if (catError) throw catError;
+			const categoryId = catData?.[0].id;
+
+			const { data: entryData, error: entryError } = await supabase
+				.from("entries")
+				.insert({
+					title: data.article_name.trim(),
+					price: data.price,
+					quantity: data.quantity,
+					user_id: userId,
+				})
+				.select("id")
+				.single();
+
+			if (entryError) throw entryError;
+			const entryId = entryData?.id;
+
+			const { error: linkError } = await supabase
+				.from("entry_categories")
+				.insert([
+					{
+						entry_id: entryId,
+						category_id: categoryId,
+					},
+				]);
+
+			if (linkError) throw linkError;
+
+			// TODO: Add toast that shows success
+		} catch (err) {
+			console.error(err);
+		}
 		reset();
 	};
 
@@ -70,6 +122,24 @@ export default function NewEntryForm() {
 				/>
 				<Field.Error className="text-sm text-red-800">
 					{errors.article_name?.message}
+				</Field.Error>
+			</Field.Root>
+
+			<Field.Root
+				name="quantity"
+				className="flex flex-col items-start gap-1"
+			>
+				<Field.Label className="text-sm font-medium text-gray-900">
+					Quantity
+				</Field.Label>
+				<Field.Control
+					{...register("quantity")}
+					type="number"
+					placeholder="Enter Quantity"
+					className="h-10 w-full rounded-md border border-gray-200 pl-3.5 text-base text-gray-900 focus:outline-2 focus:-outline-offset-1 focus:outline-blue-800"
+				/>
+				<Field.Error className="text-sm text-red-800">
+					{errors.quantity?.message}
 				</Field.Error>
 			</Field.Root>
 
@@ -110,7 +180,6 @@ export default function NewEntryForm() {
 
 			<Button
 				type="submit"
-				// variant="def"
 				disabled={isSubmitting}
 			>
 				{isSubmitting ? "Submitting…" : "Submit"}
