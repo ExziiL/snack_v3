@@ -4,6 +4,7 @@ import { createClient } from "@/supabase/client";
 import { Field } from "@base-ui-components/react/field";
 import { Form } from "@base-ui-components/react/form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -31,6 +32,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function NewEntryForm() {
+	const queryClient = useQueryClient();
 	const supabase = createClient();
 
 	const {
@@ -58,7 +60,7 @@ export default function NewEntryForm() {
 			const { data: catData, error: catError } = await supabase
 				.from("categories")
 				.upsert(
-					{ name: data.article_name.trim(), user_id: userId },
+					{ name: data.category.trim(), user_id: userId },
 					{ onConflict: "name" }
 				)
 				.select("id");
@@ -91,6 +93,7 @@ export default function NewEntryForm() {
 
 			if (linkError) throw linkError;
 
+			queryClient.invalidateQueries({ queryKey: ["entries"] });
 			// TODO: Add toast that shows success
 		} catch (err) {
 			console.error(err);

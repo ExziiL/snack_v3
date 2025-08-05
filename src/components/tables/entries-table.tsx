@@ -17,16 +17,29 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { createClient } from "@/supabase/client";
 import { Category, Entry } from "@/types";
+import { useQuery } from "@tanstack/react-query";
 
 const columnHelper = createColumnHelper<Entry>();
 
-interface IProps {
-	entries: Entry[];
+async function fetchEntries() {
+	const supabase = createClient();
+	const { data, error } = await supabase
+		.from("entries")
+		.select(
+			`id, title, quantity, price, entry_categories (categories (id, name ))`
+		);
+	if (error) throw error;
+	return data;
 }
 
-export default function EntriesTable({ entries }: IProps) {
-	const [data] = useState(() => [...entries]);
+export default function EntriesTable() {
+	const { data: entries = [], isLoading } = useQuery({
+		queryKey: ["entries"],
+		queryFn: fetchEntries,
+	});
+
 	const rerender = useReducer(() => ({}), {})[1];
 
 	const columns = useMemo(
@@ -70,10 +83,12 @@ export default function EntriesTable({ entries }: IProps) {
 	);
 
 	const table = useReactTable({
-		data,
+		data: entries as unknown as Entry[],
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 	});
+
+	if (isLoading) return <div>Loading…</div>;
 
 	return (
 		<div className="p-2">
@@ -122,13 +137,6 @@ export default function EntriesTable({ entries }: IProps) {
 			</Table>
 
 			<div className="h-4" />
-
-			<Button
-				onClick={() => rerender()}
-				className="border p-2"
-			>
-				Rerender
-			</Button>
 		</div>
 	);
 }
