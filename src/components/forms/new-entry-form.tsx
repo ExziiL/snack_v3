@@ -32,6 +32,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function NewEntryForm() {
 	const supabase = createClient();
+
 	const {
 		register,
 		handleSubmit,
