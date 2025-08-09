@@ -1,6 +1,6 @@
 "use client";
 
-import { Select } from "@base-ui-components/react";
+import { Select, Toast } from "@base-ui-components/react";
 import { Field } from "@base-ui-components/react/field";
 import { Form } from "@base-ui-components/react/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +34,8 @@ export default function NewEntryForm() {
 	const categories = useQuery(api.categories.list);
 	const createItem = useMutation(api.entries.create);
 
+	const toastManager = Toast.useToastManager();
+
 	const {
 		register,
 		handleSubmit,
@@ -57,6 +59,11 @@ export default function NewEntryForm() {
 				price: data.price,
 				quantity: data.quantity,
 				categoryId: data.categoryId as Id<"categories">,
+			});
+
+			toastManager.add({
+				description: "Successfully added new entry.",
+				type: "success",
 			});
 			reset();
 		} catch (error) {
