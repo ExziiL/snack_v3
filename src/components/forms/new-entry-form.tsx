@@ -12,27 +12,40 @@ import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { Button } from "../ui/button";
 
-const schema = z.object({
-	article_name: z
-		.string()
-		.min(1, { message: "Article name is required" })
-		.min(2, { message: "Must be at least 2 characters" }),
-	price: z.coerce
-		.number()
-		.min(1, { message: "Price is required" })
-		.positive("Must be a positive number"),
-	categoryId: z.string().min(1, { message: "Category is required" }),
-	quantity: z.coerce
-		.number()
-		.min(1, { message: "Quantity is required" })
-		.positive("Must be a positive number"),
-});
+const schema = z
+	.object({
+		article_name: z
+			.string()
+			.min(1, { message: "Article name is required" })
+			.min(2, { message: "Must be at least 2 characters" }),
+		price: z.coerce
+			.number()
+			.min(1, { message: "Price is required" })
+			.positive("Must be a positive number"),
+		categoryId: z.string().optional(),
+		quantity: z.coerce
+			.number()
+			.min(1, { message: "Quantity is required" })
+			.positive("Must be a positive number"),
+		newCategory: z
+			.string()
+			.min(2, { message: "Must be at least 2 characters" }),
+	})
+	.refine(
+		(data) =>
+			data.categoryId || (data.newCategory && data.newCategory.length > 0),
+		{
+			message: "Either select a category or enter a new one",
+			path: ["categoryId"],
+		}
+	);
 
 type FormValues = z.infer<typeof schema>;
 
 export default function NewEntryForm() {
 	const categories = useQuery(api.categories.list);
 	const createItem = useMutation(api.entries.create);
+	const createCategory = useMutation(api.categories.createCategory);
 
 	const toastManager = Toast.useToastManager();
 
@@ -48,18 +61,32 @@ export default function NewEntryForm() {
 			article_name: "Cola Zero",
 			quantity: 1,
 			price: 123,
+			newCategory: "",
 			categoryId: "",
 		},
 	});
 
 	const onSubmit = async (data: FormValues) => {
 		try {
-			await createItem({
-				name: data.article_name,
-				price: data.price,
-				quantity: data.quantity,
-				categoryId: data.categoryId as Id<"categories">,
-			});
+			if (data.newCategory.length > 0) {
+				const categoryId = await createCategory({
+					name: data.newCategory,
+				});
+
+				await createItem({
+					name: data.article_name,
+					price: data.price,
+					quantity: data.quantity,
+					categoryId: categoryId,
+				});
+			} else {
+				await createItem({
+					name: data.article_name,
+					price: data.price,
+					quantity: data.quantity,
+					categoryId: data.categoryId as Id<"categories">,
+				});
+			}
 
 			toastManager.add({
 				description: "Successfully added new entry.",
@@ -78,7 +105,7 @@ export default function NewEntryForm() {
 
 	return (
 		<Form
-			className="flex w-full max-w-64 flex-col gap-4"
+			className="flex flex-col w-full gap-4 max-w-64"
 			onSubmit={handleSubmit(onSubmit)}
 			errors={formErrors}
 		>
@@ -135,6 +162,23 @@ export default function NewEntryForm() {
 				</Field.Error>
 			</Field.Root>
 
+			<Field.Root
+				name="newCategory"
+				className="flex flex-col items-start gap-1"
+			>
+				<Field.Label className="text-sm font-medium text-gray-900">
+					New Category
+				</Field.Label>
+				<Field.Control
+					{...register("newCategory")}
+					placeholder="Enter new category"
+					className="h-10 w-full rounded-md border border-gray-200 pl-3.5 text-base text-gray-900 focus:outline-2 focus:-outline-offset-1 focus:outline-blue-800"
+				/>
+				<Field.Error className="text-sm text-red-800">
+					{errors.newCategory?.message}
+				</Field.Error>
+			</Field.Root>
+
 			<Controller
 				name="categoryId"
 				control={control}
@@ -167,7 +211,7 @@ export default function NewEntryForm() {
 								</Select.Trigger>
 								<Select.Portal>
 									<Select.Positioner
-										className="outline-none select-none z-10"
+										className="z-10 outline-none select-none"
 										sideOffset={8}
 									>
 										<Select.ScrollUpArrow className="top-0 z-[1] flex h-4 w-full cursor-default items-center justify-center rounded-md bg-[canvas] text-center text-xs before:absolute before:top-[-100%] before:left-0 before:h-full before:w-full before:content-[''] data-[direction=down]:bottom-0 data-[direction=down]:before:bottom-[-100%]" />

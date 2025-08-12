@@ -27,6 +27,15 @@ export const create = mutation({
 	},
 });
 
+export const deleteEntry = mutation({
+	args: {
+		id: v.id("entries"),
+	},
+	handler: async (ctx, args) => {
+		return ctx.db.delete(args.id);
+	},
+});
+
 export const listWithCategory = query({
 	handler: async (ctx) => {
 		const entries = await ctx.db.query("entries").order("desc").collect();

@@ -2,15 +2,16 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 export const list = query({
+	args: {},
 	handler: async (ctx) => {
 		return await ctx.db.query("categories").order("asc").collect();
 	},
 });
 
-export const create = mutation({
+export const createCategory = mutation({
 	args: { name: v.string() },
 	handler: async (ctx, args) => {
-		const normalizedName = args.name.trim();
+		const normalizedName = args.name.trim().toLowerCase();
 		if (normalizedName === "") {
 			throw new Error("Category name cannot be empty");
 		}
@@ -27,7 +28,7 @@ export const create = mutation({
 		}
 
 		const categoryId = await ctx.db.insert("categories", {
-			name: normalizedName,
+			name: args.name.trim(),
 		});
 
 		return categoryId;

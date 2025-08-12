@@ -17,11 +17,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useQuery } from "convex/react";
+import { Toast } from "@base-ui-components/react";
+import { useMutation, useQuery } from "convex/react";
 import { FunctionReturnType } from "convex/server";
-import { Infer } from "convex/values";
+import { Trash2Icon } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
-import { Doc } from "../../../convex/_generated/dataModel";
+import { Id } from "../../../convex/_generated/dataModel";
 
 type EntriesWithCategory = FunctionReturnType<
 	typeof api.entries.listWithCategory
@@ -31,7 +32,15 @@ type EntryWithCategory = EntriesWithCategory[number];
 const columnHelper = createColumnHelper<EntryWithCategory>();
 
 export default function EntriesTable() {
+	const deleteEntry = useMutation(api.entries.deleteEntry);
 	const entries = useQuery(api.entries.listWithCategory);
+	const toastManager = Toast.useToastManager();
+
+	const handleDelete = async ({ id }: { id: Id<"entries"> }) => {
+		await deleteEntry({ id: id }).then(() => {
+			toastManager.add({ title: "Successfully deleted entry" });
+		});
+	};
 
 	const columns = useMemo(
 		() => [
@@ -53,18 +62,35 @@ export default function EntriesTable() {
 			columnHelper.accessor("price", {
 				header: () => "Price",
 				cell: ({ row }) => {
-					const amount = parseFloat(row.getValue("price"));
+					const amount = parseFloat(row.getValue("price")) / 100;
 					const formatted = new Intl.NumberFormat("de-DE", {
 						style: "currency",
 						currency: "EUR",
 					}).format(amount);
 
-					return <div className="text-right font-medium">{formatted}</div>;
+					return <div className="font-medium">{formatted}</div>;
 				},
 				footer: (info) => info.column.id,
 			}),
+			columnHelper.display({
+				id: "actions",
+				header: () => "Actions",
+				cell: ({ row }) => {
+					const entry = row.original;
+
+					return (
+						<Button
+							size="icon"
+							variant="ghost"
+							onClick={() => handleDelete({ id: row.original._id })}
+						>
+							<Trash2Icon size={16} />
+						</Button>
+					);
+				},
+			}),
 		],
-		[]
+		[handleDelete]
 	);
 
 	const table = useReactTable({
