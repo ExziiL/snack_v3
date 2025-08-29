@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/input";
-import { login, signup } from "./actions";
 
 export default function LoginPage() {
 	return (
@@ -20,8 +19,8 @@ export default function LoginPage() {
 				required
 			/>
 			<div className="flex gap-2 w-fit pt-4">
-				<Button formAction={login}>Log in</Button>
-				<Button formAction={signup}>Sign up</Button>
+				{/* <Button formAction={login}>Log in</Button>
+				<Button formAction={signup}>Sign up</Button> */}
 			</div>
 		</form>
 	);
