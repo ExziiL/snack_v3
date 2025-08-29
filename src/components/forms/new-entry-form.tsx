@@ -27,9 +27,8 @@ const schema = z
 			.number()
 			.min(1, { message: "Quantity is required" })
 			.positive("Must be a positive number"),
-		newCategory: z
-			.string()
-			.min(2, { message: "Must be at least 2 characters" }),
+		newCategory: z.string().optional(),
+		purchaseDate: z.string(),
 	})
 	.refine(
 		(data) =>
@@ -63,12 +62,13 @@ export default function NewEntryForm() {
 			price: 123,
 			newCategory: "",
 			categoryId: "",
+			purchaseDate: new Date().toISOString(),
 		},
 	});
 
 	const onSubmit = async (data: FormValues) => {
 		try {
-			if (data.newCategory.length > 0) {
+			if (data.newCategory && data.newCategory?.length > 0) {
 				const categoryId = await createCategory({
 					name: data.newCategory,
 				});
@@ -78,6 +78,7 @@ export default function NewEntryForm() {
 					price: data.price,
 					quantity: data.quantity,
 					categoryId: categoryId,
+					purchaseDate: data.purchaseDate,
 				});
 			} else {
 				await createItem({
@@ -85,6 +86,7 @@ export default function NewEntryForm() {
 					price: data.price,
 					quantity: data.quantity,
 					categoryId: data.categoryId as Id<"categories">,
+					purchaseDate: data.purchaseDate,
 				});
 			}
 
@@ -159,6 +161,24 @@ export default function NewEntryForm() {
 				/>
 				<Field.Error className="text-sm text-red-800">
 					{errors.price?.message}
+				</Field.Error>
+			</Field.Root>
+
+			<Field.Root
+				name="purchaseDate"
+				className="flex flex-col items-start gap-1"
+			>
+				<Field.Label className="text-sm font-medium text-gray-900">
+					Price
+				</Field.Label>
+				<Field.Control
+					{...register("purchaseDate")}
+					type="date"
+					placeholder="Enter date"
+					className="h-10 w-full rounded-md border border-gray-200 pl-3.5 text-base text-gray-900 focus:outline-2 focus:-outline-offset-1 focus:outline-blue-800"
+				/>
+				<Field.Error className="text-sm text-red-800">
+					{errors.purchaseDate?.message}
 				</Field.Error>
 			</Field.Root>
 

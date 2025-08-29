@@ -14,13 +14,15 @@ export const create = mutation({
 		quantity: v.number(),
 		price: v.number(),
 		categoryId: v.id("categories"),
+		purchaseDate: v.string(),
 	},
 	handler: async (ctx, args) => {
 		const entryId = await ctx.db.insert("entries", {
 			name: args.name,
 			quantity: args.quantity,
 			price: args.price,
-			categoryId: args.categoryId,
+			category_id: args.categoryId,
+			purchase_date: args.purchaseDate,
 		});
 
 		return entryId;
@@ -42,7 +44,7 @@ export const listWithCategory = query({
 
 		const itemsWithCategory = await Promise.all(
 			entries.map(async (entry) => {
-				const category = await ctx.db.get(entry.categoryId);
+				const category = await ctx.db.get(entry.category_id);
 
 				return {
 					...entry,

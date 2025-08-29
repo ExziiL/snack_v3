@@ -8,6 +8,7 @@ export default defineSchema({
 		name: v.string(),
 		price: v.float64(),
 		quantity: v.float64(),
-		categoryId: v.id("categories"),
-	}).index("by_categoryId", ["categoryId"]),
+		purchase_date: v.string(),
+		category_id: v.id("categories"),
+	}).index("by_categoryId", ["category_id"]),
 });

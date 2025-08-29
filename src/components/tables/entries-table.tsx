@@ -20,7 +20,7 @@ import {
 import { EntryWithCategory } from "@/types/entry-with-category";
 import { Toast } from "@base-ui-components/react";
 import { useMutation, useQuery } from "convex/react";
-import { FunctionReturnType } from "convex/server";
+import { format } from "date-fns";
 import { Trash2Icon } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
@@ -41,6 +41,16 @@ export default function EntriesTable() {
 
 	const columns = useMemo(
 		() => [
+			columnHelper.accessor("purchase_date", {
+				header: () => "Date",
+				cell: ({ row }) => {
+					const date = row.getValue("purchase_date") as Date;
+					const formattedDate = format(date, "dd.MM.yyyy");
+
+					return formattedDate;
+				},
+				footer: (info) => info.column.id,
+			}),
 			columnHelper.accessor("name", {
 				header: () => "Title",
 				cell: (info) => info.getValue(),
