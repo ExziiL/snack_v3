@@ -17,17 +17,14 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { EntryWithCategory } from "@/types/entry-with-category";
 import { Toast } from "@base-ui-components/react";
 import { useMutation, useQuery } from "convex/react";
 import { FunctionReturnType } from "convex/server";
 import { Trash2Icon } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-
-type EntriesWithCategory = FunctionReturnType<
-	typeof api.entries.listWithCategory
->;
-type EntryWithCategory = EntriesWithCategory[number];
+import PriceDisplay from "../price-display";
 
 const columnHelper = createColumnHelper<EntryWithCategory>();
 
@@ -62,13 +59,13 @@ export default function EntriesTable() {
 			columnHelper.accessor("price", {
 				header: () => "Price",
 				cell: ({ row }) => {
-					const amount = parseFloat(row.getValue("price")) / 100;
-					const formatted = new Intl.NumberFormat("de-DE", {
-						style: "currency",
-						currency: "EUR",
-					}).format(amount);
+					const amount = parseFloat(row.getValue("price"));
 
-					return <div className="font-medium">{formatted}</div>;
+					return (
+						<div className="font-medium">
+							<PriceDisplay price={amount} />
+						</div>
+					);
 				},
 				footer: (info) => info.column.id,
 			}),
