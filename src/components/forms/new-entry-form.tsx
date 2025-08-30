@@ -67,6 +67,8 @@ export default function NewEntryForm() {
 			price: 123,
 			newCategory: "",
 			categoryId: "",
+			newStore: "",
+			storeId: "",
 			purchaseDate: new Date().toISOString(),
 		},
 	});
@@ -197,15 +199,17 @@ export default function NewEntryForm() {
 						>
 							<Field.Label className="text-sm font-medium text-gray-900">Store</Field.Label>
 							<Select.Root
-								items={stores?.map((store) => ({
-									label: store.name,
-									value: store._id,
-								}))}
+								items={
+									stores?.map((store) => ({
+										label: store.name,
+										value: store._id,
+									})) ?? []
+								}
 								value={field.value as Id<"stores">}
 								onValueChange={field.onChange}
 							>
 								<Select.Trigger className="flex h-10 min-w-36 items-center justify-between gap-3 rounded-md border border-gray-200 pr-3 pl-3.5 text-base text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:-outline-offset-1 focus-visible:outline-blue-800 data-[popup-open]:bg-gray-100 cursor-default">
-									<Select.Value>{selectedStore?.name}</Select.Value>
+									<Select.Value>{selectedStore?.name || "Select a store"}</Select.Value>
 									<Select.Icon className="flex">
 										<ChevronUpDownIcon />
 									</Select.Icon>
@@ -266,15 +270,17 @@ export default function NewEntryForm() {
 						>
 							<Field.Label className="text-sm font-medium text-gray-900">Category</Field.Label>
 							<Select.Root
-								items={categories?.map((category) => ({
-									label: category.name,
-									value: category._id,
-								}))}
+								items={
+									categories?.map((category) => ({
+										label: category.name,
+										value: category._id,
+									})) ?? []
+								}
 								value={field.value as Id<"categories">}
 								onValueChange={field.onChange}
 							>
 								<Select.Trigger className="flex h-10 min-w-36 items-center justify-between gap-3 rounded-md border border-gray-200 pr-3 pl-3.5 text-base text-gray-900 select-none hover:bg-gray-100 focus-visible:outline focus-visible:-outline-offset-1 focus-visible:outline-blue-800 data-[popup-open]:bg-gray-100 cursor-default">
-									<Select.Value>{selectedCategory?.name}</Select.Value>
+									<Select.Value>{selectedCategory?.name || "Select a category"}</Select.Value>
 									<Select.Icon className="flex">
 										<ChevronUpDownIcon />
 									</Select.Icon>

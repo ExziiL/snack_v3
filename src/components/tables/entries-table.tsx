@@ -6,7 +6,7 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import React, { useMemo, useReducer, useState } from "react";
+import React, { useCallback, useMemo, useReducer, useState } from "react";
 import { Button } from "../ui/button";
 
 import {
@@ -33,11 +33,14 @@ export default function EntriesTable() {
 	const entries = useQuery(api.entries.listWithCategoryAndStore);
 	const toastManager = Toast.useToastManager();
 
-	const handleDelete = async ({ id }: { id: Id<"entries"> }) => {
-		await deleteEntry({ id: id }).then(() => {
-			toastManager.add({ title: "Successfully deleted entry" });
-		});
-	};
+	const handleDelete = useCallback(
+		async ({ id }: { id: Id<"entries"> }) => {
+			await deleteEntry({ id: id }).then(() => {
+				toastManager.add({ title: "Successfully deleted entry" });
+			});
+		},
+		[deleteEntry, toastManager]
+	);
 
 	const columns = useMemo(
 		() => [
