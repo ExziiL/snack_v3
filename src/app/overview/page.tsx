@@ -5,7 +5,7 @@ import React from "react";
 import { api } from "../../../convex/_generated/api";
 
 export default function Overview() {
-	const entries = useQuery(api.entries.listWithCategory);
+	const entries = useQuery(api.entries.listWithCategoryAndStore);
 
 	return (
 		<div>

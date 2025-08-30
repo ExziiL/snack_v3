@@ -30,7 +30,7 @@ const columnHelper = createColumnHelper<EntryWithCategory>();
 
 export default function EntriesTable() {
 	const deleteEntry = useMutation(api.entries.deleteEntry);
-	const entries = useQuery(api.entries.listWithCategory);
+	const entries = useQuery(api.entries.listWithCategoryAndStore);
 	const toastManager = Toast.useToastManager();
 
 	const handleDelete = async ({ id }: { id: Id<"entries"> }) => {
@@ -51,8 +51,13 @@ export default function EntriesTable() {
 				},
 				footer: (info) => info.column.id,
 			}),
+			columnHelper.accessor("storeName", {
+				header: () => "Store",
+				cell: (info) => info.getValue(),
+				footer: (info) => info.column.id,
+			}),
 			columnHelper.accessor("name", {
-				header: () => "Title",
+				header: () => "Item",
 				cell: (info) => info.getValue(),
 				footer: (info) => info.column.id,
 			}),
@@ -67,7 +72,7 @@ export default function EntriesTable() {
 				footer: (info) => info.column.id,
 			}),
 			columnHelper.accessor("price", {
-				header: () => "Price",
+				header: () => "Price per item",
 				cell: ({ row }) => {
 					const amount = parseFloat(row.getValue("price"));
 
@@ -79,6 +84,20 @@ export default function EntriesTable() {
 				},
 				footer: (info) => info.column.id,
 			}),
+			columnHelper.accessor("total", {
+				header: () => "Total price",
+				cell: ({ row }) => {
+					const amount = parseFloat(row.getValue("price")) * parseFloat(row.getValue("quantity"));
+
+					return (
+						<div className="font-medium">
+							<PriceDisplay price={amount} />
+						</div>
+					);
+				},
+				footer: (info) => info.column.id,
+			}),
+
 			columnHelper.display({
 				id: "actions",
 				header: () => "Actions",
@@ -116,10 +135,7 @@ export default function EntriesTable() {
 								<TableHead key={header.id}>
 									{header.isPlaceholder
 										? null
-										: flexRender(
-												header.column.columnDef.header,
-												header.getContext()
-											)}
+										: flexRender(header.column.columnDef.header, header.getContext())}
 								</TableHead>
 							))}
 						</TableRow>
@@ -131,10 +147,7 @@ export default function EntriesTable() {
 							<TableRow key={row.id}>
 								{row.getVisibleCells().map((cell) => (
 									<TableCell key={cell.id}>
-										{flexRender(
-											cell.column.columnDef.cell,
-											cell.getContext()
-										)}
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
 									</TableCell>
 								))}
 							</TableRow>

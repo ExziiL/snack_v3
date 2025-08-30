@@ -14,6 +14,7 @@ export const create = mutation({
 		quantity: v.number(),
 		price: v.number(),
 		categoryId: v.id("categories"),
+		storeId: v.id("stores"),
 		purchaseDate: v.string(),
 	},
 	handler: async (ctx, args) => {
@@ -22,6 +23,7 @@ export const create = mutation({
 			quantity: args.quantity,
 			price: args.price,
 			category_id: args.categoryId,
+			store_id: args.storeId,
 			purchase_date: args.purchaseDate,
 		});
 
@@ -38,17 +40,19 @@ export const deleteEntry = mutation({
 	},
 });
 
-export const listWithCategory = query({
+export const listWithCategoryAndStore = query({
 	handler: async (ctx) => {
 		const entries = await ctx.db.query("entries").order("desc").collect();
 
 		const itemsWithCategory = await Promise.all(
 			entries.map(async (entry) => {
 				const category = await ctx.db.get(entry.category_id);
+				const store = entry.store_id ? await ctx.db.get(entry.store_id) : null;
 
 				return {
 					...entry,
 					categoryName: category?.name,
+					storeName: store?.name,
 				};
 			})
 		);
