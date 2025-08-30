@@ -10,6 +10,7 @@
 	},
 	"dependencies": {
 		"@base-ui-components/react": "^1.0.0-beta.2",
+		"@convex-dev/migrations": "^0.2.9",
 		"@hookform/resolvers": "^5.2.1",
 		"@tanstack/react-table": "^8.21.3",
 		"class-variance-authority": "^0.7.1",

@@ -43,6 +43,11 @@
     reselect "^5.1.1"
     use-sync-external-store "^1.5.0"
 
+"@convex-dev/migrations@^0.2.9":
+  version "0.2.9"
+  resolved "https://registry.yarnpkg.com/@convex-dev/migrations/-/migrations-0.2.9.tgz#d8895a22034bdc98c5061c3df042a9649224e146"
+  integrity sha512-HfIv6/F8VbtJ1NVT2bQRTumJGdaqROl/+s5IOnubHm7vvgie0RjcfO6YiB7JoLFWwS19vjDQDKl63ihoA08zOA==
+
 "@emnapi/core@^1.4.3":
   version "1.4.5"
   resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.4.5.tgz#bfbb0cbbbb9f96ec4e2c4fd917b7bbe5495ceccb"
