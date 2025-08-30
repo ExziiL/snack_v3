@@ -1,9 +1,9 @@
-import { EntryWithCategory } from "@/types/entry-with-category";
+import { EntryWithCategoryAndStore } from "@/types/entry-with-category-and-store";
 import React from "react";
 import PriceDisplay from "./price-display";
 
 interface IProps {
-	entry: EntryWithCategory;
+	entry: EntryWithCategoryAndStore;
 }
 
 export default function EntryCard({ entry }: IProps) {

@@ -17,7 +17,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { EntryWithCategory } from "@/types/entry-with-category";
+import { EntryWithCategoryAndStore } from "@/types/entry-with-category-and-store";
 import { Toast } from "@base-ui-components/react";
 import { useMutation, useQuery } from "convex/react";
 import { format } from "date-fns";
@@ -26,7 +26,7 @@ import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import PriceDisplay from "../price-display";
 
-const columnHelper = createColumnHelper<EntryWithCategory>();
+const columnHelper = createColumnHelper<EntryWithCategoryAndStore & { total: number }>();
 
 export default function EntriesTable() {
 	const deleteEntry = useMutation(api.entries.deleteEntry);
@@ -123,7 +123,7 @@ export default function EntriesTable() {
 	);
 
 	const table = useReactTable({
-		data: entries ?? [],
+		data: (entries as (EntryWithCategoryAndStore & { total: number })[]) ?? [],
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 	});
