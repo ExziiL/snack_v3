@@ -13,7 +13,9 @@ export default defineSchema({
 		purchase_date: v.string(),
 		store_id: v.id("stores"),
 		category_id: v.id("categories"),
+		user_id: v.string(),
 	})
 		.index("by_categoryId", ["category_id"])
-		.index("by_storeId", ["store_id"]),
+		.index("by_storeId", ["store_id"])
+		.index("by_userId", ["user_id"]),
 });

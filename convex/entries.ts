@@ -4,7 +4,14 @@ import { mutation, query } from "./_generated/server";
 export const get = query({
 	args: {},
 	handler: async (ctx) => {
-		return ctx.db.query("entries").collect();
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			throw new Error("Not authenticated");
+		}
+		return ctx.db
+			.query("entries")
+			.withIndex("by_userId", (q) => q.eq("user_id", identity.subject))
+			.collect();
 	},
 });
 
@@ -18,6 +25,11 @@ export const create = mutation({
 		purchaseDate: v.string(),
 	},
 	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			throw new Error("Not authenticated");
+		}
+
 		const entryId = await ctx.db.insert("entries", {
 			name: args.name,
 			quantity: args.quantity,
@@ -25,6 +37,7 @@ export const create = mutation({
 			category_id: args.categoryId,
 			store_id: args.storeId,
 			purchase_date: args.purchaseDate,
+			user_id: identity.subject,
 		});
 
 		return entryId;
@@ -36,13 +49,36 @@ export const deleteEntry = mutation({
 		id: v.id("entries"),
 	},
 	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			throw new Error("Not authenticated");
+		}
+
+		const entry = await ctx.db.get(args.id);
+		if (!entry) {
+			throw new Error("Entry not found");
+		}
+
+		if (entry.user_id !== identity.subject) {
+			throw new Error("Not authorized to delete this entry");
+		}
+
 		return ctx.db.delete(args.id);
 	},
 });
 
 export const listWithCategoryAndStore = query({
 	handler: async (ctx) => {
-		const entries = await ctx.db.query("entries").order("desc").collect();
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			throw new Error("Not authenticated");
+		}
+
+		const entries = await ctx.db
+			.query("entries")
+			.withIndex("by_userId", (q) => q.eq("user_id", identity.subject))
+			.order("desc")
+			.collect();
 
 		const itemsWithCategory = await Promise.all(
 			entries.map(async (entry) => {

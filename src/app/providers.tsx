@@ -2,12 +2,15 @@
 
 import { ConvexClientProvider } from "@/providers/ConvexClientProvider";
 import { ToastProvider } from "@/providers/toast-provider";
+import { ClerkProvider } from "@clerk/nextjs";
 import type * as React from "react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
 	return (
-		<ConvexClientProvider>
-			<ToastProvider>{children}</ToastProvider>
-		</ConvexClientProvider>
+		<ClerkProvider>
+			<ConvexClientProvider>
+				<ToastProvider>{children}</ToastProvider>
+			</ConvexClientProvider>
+		</ClerkProvider>
 	);
 }
