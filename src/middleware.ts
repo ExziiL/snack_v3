@@ -6,7 +6,9 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 // 	if (!isPublicRoute(req)) await auth.protect();
 // });
 
-export default clerkMiddleware();
+export default clerkMiddleware({
+	authorizedParties: ["https://snack-v3.app", "https://www.snack-v3.app"],
+});
 
 export const config = {
 	matcher: [
