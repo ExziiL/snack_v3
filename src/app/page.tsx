@@ -15,9 +15,10 @@ export default function Home() {
 					<EntriesTable />
 				</div>
 			</Authenticated>
-			{/* <Unauthenticated>
+			<Unauthenticated>
+				<h1>Unauthenticated Please Sign In</h1>
 				<SignInButton />
-			</Unauthenticated> */}
+			</Unauthenticated>
 		</>
 	);
 }
