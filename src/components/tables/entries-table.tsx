@@ -6,7 +6,7 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import React, { useCallback, useMemo, useReducer, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
 
 import {
