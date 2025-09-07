@@ -1,20 +1,21 @@
-import { cn } from "@/lib/utils";
+import { useRender } from "@base-ui-components/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
-import React from "react";
+import * as React from "react";
 
-// ("inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive");
+import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-	"flex h-10 items-center justify-center rounded-md  text-base font-medium  select-none focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-blue-800  disabled:cursor-not-allowed ",
+	"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
 	{
 		variants: {
 			variant: {
-				default:
-					"border border-gray-200 bg-gray-50 hover:bg-gray-100 disabled:bg-gray-100 disabled:text-gray-400 text-gray-900 active:bg-gray-100",
-				destructive: "",
-				outline: "",
-				secondary: "",
-				ghost: "hover:bg-gray-100",
+				default: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+				destructive:
+					"bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+				outline:
+					"border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+				secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
+				ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
 				link: "text-primary underline-offset-4 hover:underline",
 			},
 			size: {
@@ -31,19 +32,19 @@ const buttonVariants = cva(
 	}
 );
 
-function Button({
-	className,
-	variant,
-	size,
-	...props
-}: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants>) {
-	return (
-		<button
-			data-slot="button"
-			className={cn(buttonVariants({ variant, size, className }))}
-			{...props}
-		/>
-	);
+interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
+	render?: useRender.RenderProp;
+}
+
+function Button({ className, variant, size, render = <button />, ...props }: ButtonProps) {
+	return useRender({
+		render,
+		props: {
+			"data-slot": "button",
+			className: cn(buttonVariants({ variant, size, className })),
+			...props,
+		},
+	});
 }
 
 export { Button, buttonVariants };
