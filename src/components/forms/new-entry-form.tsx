@@ -1,13 +1,11 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn, formatYNABInput, parseYNABPrice } from "@/lib/utils";
 import { Toast } from "@base-ui-components/react";
-import { Field } from "@base-ui-components/react/field";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { api } from "../../../convex/_generated/api";
@@ -29,10 +27,16 @@ const schema = z
 		price: z
 			.string()
 			.min(1, { message: "Price is required" })
-			.refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-				message: "Must be a positive number",
-			})
-			.transform((val) => Number(val)),
+			.refine(
+				(val) => {
+					const numericValue = val.replace(/[^\d]/g, "");
+					return numericValue.length > 0 && parseInt(numericValue, 10) > 0;
+				},
+				{
+					message: "Must be a positive number",
+				}
+			)
+			.transform((val) => parseYNABPrice(val)),
 		selectedCategory: z
 			.object({
 				id: z.string(),
@@ -152,8 +156,11 @@ export default function NewEntryForm() {
 							<FormLabel>Price</FormLabel>
 							<FormControl>
 								<Input
-									{...field}
-									type="number"
+									value={field.value}
+									onChange={(e) => {
+										const formatted = formatYNABInput(e.target.value);
+										field.onChange(formatted);
+									}}
 									placeholder="Enter price"
 								/>
 							</FormControl>
