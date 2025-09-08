@@ -1,17 +1,22 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { Toast } from "@base-ui-components/react";
 import { Field } from "@base-ui-components/react/field";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { Button } from "../ui/button";
+import { Calendar } from "../ui/calendar";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
+import { Popover, PopoverContent, PopoverPositioner, PopoverTrigger } from "../ui/popover";
 import NewCategoryCombobox from "./inputs/new-category-combobox";
 import NewStoreCombobox from "./inputs/new-store-combobox";
 
@@ -61,9 +66,9 @@ export default function NewEntryForm() {
 	const form = useForm({
 		resolver: zodResolver(schema),
 		defaultValues: {
-			article_name: "Cola Zero",
+			article_name: "",
 			quantity: 1,
-			price: 123,
+			price: undefined,
 			selectedCategory: null,
 			selectedStore: null,
 			purchaseDate: new Date().toISOString(),
@@ -160,11 +165,33 @@ export default function NewEntryForm() {
 						<FormItem>
 							<FormLabel>Date</FormLabel>
 							<FormControl>
-								<Input
-									{...field}
-									type="date"
-									placeholder="Enter date"
-								/>
+								<Popover>
+									<PopoverTrigger
+										render={
+											<Button
+												variant={"outline"}
+												className={cn(
+													"w-[240px] pl-3 text-left font-normal",
+													!field.value && "text-muted-foreground"
+												)}
+											/>
+										}
+									>
+										{field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+										<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+									</PopoverTrigger>
+									<PopoverPositioner>
+										<PopoverContent className="w-auto p-0">
+											<Calendar
+												mode="single"
+												selected={field.value}
+												onSelect={field.onChange}
+												disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+												captionLayout="dropdown"
+											/>
+										</PopoverContent>
+									</PopoverPositioner>
+								</Popover>
 							</FormControl>
 							<FormMessage>{form.formState.errors.purchaseDate?.message}</FormMessage>
 						</FormItem>
