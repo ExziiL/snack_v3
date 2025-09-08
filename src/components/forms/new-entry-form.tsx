@@ -26,10 +26,13 @@ const schema = z
 			.string()
 			.min(1, { message: "Article name is required" })
 			.min(2, { message: "Must be at least 2 characters" }),
-		price: z.coerce
-			.number()
+		price: z
+			.string()
 			.min(1, { message: "Price is required" })
-			.positive("Must be a positive number"),
+			.refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+				message: "Must be a positive number",
+			})
+			.transform((val) => Number(val)),
 		selectedCategory: z
 			.object({
 				id: z.string(),
@@ -46,7 +49,7 @@ const schema = z
 			.number()
 			.min(1, { message: "Quantity is required" })
 			.positive("Must be a positive number"),
-		purchaseDate: z.string(),
+		purchaseDate: z.date(),
 	})
 	.refine((data) => data.selectedCategory !== null, {
 		message: "Please select at least one category",
@@ -68,10 +71,10 @@ export default function NewEntryForm() {
 		defaultValues: {
 			article_name: "",
 			quantity: 1,
-			price: undefined,
+			price: "",
 			selectedCategory: null,
 			selectedStore: null,
-			purchaseDate: new Date().toISOString(),
+			purchaseDate: new Date(),
 		},
 	});
 
@@ -90,7 +93,7 @@ export default function NewEntryForm() {
 				quantity: data.quantity,
 				categoryId: categoryId,
 				storeId: storeId,
-				purchaseDate: data.purchaseDate,
+				purchaseDate: data.purchaseDate.toISOString(),
 			});
 
 			toastManager.add({
@@ -200,7 +203,6 @@ export default function NewEntryForm() {
 
 				<FormField
 					name="selectedStore"
-					control={form.control}
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Store</FormLabel>
@@ -217,7 +219,6 @@ export default function NewEntryForm() {
 
 				<FormField
 					name="selectedCategory"
-					control={form.control}
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Category</FormLabel>
