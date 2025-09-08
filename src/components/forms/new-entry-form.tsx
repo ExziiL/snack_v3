@@ -22,8 +22,10 @@ const schema = z
 	.object({
 		article_name: z
 			.string()
-			.min(1, { message: "Article name is required" })
-			.min(2, { message: "Must be at least 2 characters" }),
+			.optional()
+			.refine((val) => !val || val.length >= 2, {
+				message: "Must be at least 2 characters if provided",
+			}),
 		price: z
 			.string()
 			.min(1, { message: "Price is required" })
@@ -92,7 +94,7 @@ export default function NewEntryForm() {
 			const storeId = data.selectedStore.id as Id<"stores">;
 
 			await createItem({
-				name: data.article_name,
+				name: data.article_name || data.selectedCategory.value,
 				price: data.price,
 				quantity: data.quantity,
 				categoryId: categoryId,
