@@ -106,7 +106,17 @@ export default function NewEntryForm() {
 				description: "Successfully added new entry.",
 				type: "success",
 			});
-			form.reset();
+
+			const currentDate = form.getValues("purchaseDate");
+			const currentStore = form.getValues("selectedStore");
+			form.reset({
+				article_name: "",
+				quantity: 1,
+				price: "",
+				selectedCategory: null,
+				selectedStore: currentStore,
+				purchaseDate: currentDate,
+			});
 		} catch (error) {
 			console.error("Failed to create item: ", error);
 			toastManager.add({
@@ -120,13 +130,13 @@ export default function NewEntryForm() {
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit(onSubmit)}
-				className="space-y-4"
+				className="space-y-4 max-w-md"
 			>
 				<FormField
 					name="article_name"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Article name</FormLabel>
+							<FormLabel>Article name (optional)</FormLabel>
 							<FormControl>
 								<Input {...field} />
 							</FormControl>
@@ -183,7 +193,7 @@ export default function NewEntryForm() {
 											<Button
 												variant={"outline"}
 												className={cn(
-													"w-[240px] pl-3 text-left font-normal",
+													"pl-3 text-left font-normal",
 													!field.value && "text-muted-foreground"
 												)}
 											/>
